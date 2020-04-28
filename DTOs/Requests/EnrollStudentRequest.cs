@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 
-namespace APBD_Cw3.Models
+namespace APBD_Cw3.DTOs.Requests
 {
-	public class Student
-	{
+    public class EnrollStudentRequest
+    {
+		[Required]
 		public string IndexNumber { get; set; }
+
+		[Required]
 		public string FirstName { get; set; }
+		[Required]
 		public string LastName { get; set; }
+		[Required]
 		public string BirthDate { get; set; }
 		//public string IdEnrollment { get; set; }
-
-		public string Studies { get; set;  }
-
-		public int Semester { get; set; }
-
+		[Required]
+		public string Studies { get; set; }
 	}
 }
-
-
-
