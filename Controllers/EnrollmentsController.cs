@@ -47,11 +47,13 @@ namespace APBD_Cw3.Controllers {
                     var dr = com.ExecuteReader(); //odczytujemy efekt zapytania
                     if (!dr.Read()) //jesli zapytanie NIC nie zwrocilo..
                     {
+                        dr.Close();
                         tran.Rollback(); //wycofujemy transakcje
                         return BadRequest("Studia nie istnieja.");  //musimy zwrocic blad
                     }
-                    int idStudies = (int)dr["IdStudy"]; //bierzemy number id studiow...
+                    int idStudies = (int)dr["IdStudy"]; //bierzemy number id studiow, przyda sie pozniej...
                     dr.Close();
+
                     //2. Spr czy nr indexu studenta jest unikalny
                     com.CommandText = "SELECT INDEXNUMBER FROM STUDENT WHERE INDEXNUMBER = @Index";
                     com.Parameters.AddWithValue("Index", request.IndexNumber);
@@ -68,28 +70,26 @@ namespace APBD_Cw3.Controllers {
                   
                     int IdEnrollment;
 
-                    //3. Spr nr IdEnrollment zgodny z nr studiow i najwyzszy
-                    com.CommandText = "Select IdEnrollment FROM Enrollment WHERE IdEnrollment = (Select MAX(IdEnrollment) FROM Enrollment)"; //WHERE Semester = 1 AND IdStudy =" + idStudies;
-                    //com.CommandText = "select IdEnrollment FROM Enrollment WHERE IdEnrollment = SELECT MAX(IdEnrollment) FROM Enrollment WHERE Semester = 1 AND IdStudy =" + idStudies;
+                    //3. odnajdujemy najnowszy wpis w tabeli Enrollments zgodny ze studiami studenta i wartoscia Semester = 1
+                    com.CommandText = "Select IdEnrollment FROM Enrollment WHERE Semester = 1 AND IdStudy =" + idStudies;
                     dr = com.ExecuteReader(); //odczytujemy efekt zapytania
                     if (dr.Read()) //jesli zapytanie cos zwrocilo...
                     {
-                        //IdEnrollment = ((int) dr["IdEnrollment"]); //!!!!!!!!!!!!!!!!!!!!!!!
-                        
-                        IdEnrollment = ((int) dr["IdEnrollment"])+1;
+  
+                        IdEnrollment = ((int) dr["IdEnrollment"]);
                         dr.Close();
-                        //com.CommandText = "INSERT INTO ENROLLMENT (IDENROLLMENT,SEMESTER,IDSTUDY,STARTDATE) VALUES (" + IdEnrollment.ToString() + ",1," + idStudies.ToString() + "," + DateTime.Now.ToString("yyyy-mm-dd").ToString() + ")";
-                        com.CommandText = "INSERT INTO ENROLLMENT (IDENROLLMENT,SEMESTER,IDSTUDY,STARTDATE) VALUES ("+IdEnrollment+ ",1,10, '2021-09-10')";
-                        //CONVERT(date,'" + DateTime.Now.ToString("yyyy-mm-dd") + "',0)
-                        com.ExecuteNonQuery();
 
                     }
                     else if (!dr.Read())
                     {
-                        IdEnrollment = 1;
+                        dr.Close();
+                        com.CommandText = "Select IdEnrollment FROM Enrollment WHERE IdEnrollment = (Select MAX(IdEnrollment) FROM Enrollment)";
+                        dr = com.ExecuteReader(); //Dodane
+                        dr.Read();
+                        IdEnrollment = ((int)dr["IdEnrollment"])+1;
                         dr.Close();
                         com.CommandText = "INSERT INTO ENROLLMENT (IDENROLLMENT,SEMESTER,IDSTUDY,STARTDATE) VALUES ("+IdEnrollment+",1," + idStudies + ", '2021-09-10')";
-                        //DateTime.Now.ToString("yyyy-mm-dd")
+
                         com.ExecuteNonQuery();
                     }
                     else
@@ -107,7 +107,6 @@ namespace APBD_Cw3.Controllers {
                     com.Parameters.AddWithValue("birthDate", "1993-09-11");
                     com.Parameters.AddWithValue("idEnrollment", IdEnrollment);
                     
-                    //com.CommandText = "INSERT INTO Student(IndexNumber, FirstName,LastName,BirthDate,IdEnrollment) VALUES (111,'Agaton','Kuchniarz','2000-09-10',10)"; //!!!!!!!!!!!!!
                     com.ExecuteNonQuery(); //wypychamy zapytanie
                     tran.Commit(); //potwierdzamy transakcje
 
