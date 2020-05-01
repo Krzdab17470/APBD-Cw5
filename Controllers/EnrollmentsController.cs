@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using APBD_Cw3.Models; //!!!!
 using APBD_Cw3.DTOs.Requests; //!!!!
 using APBD_Cw3.DTOs.Responses; //!!!!
+using APBD_Cw3.DTOs.Promotion;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using System.Net;
@@ -15,8 +16,29 @@ using System.Web.Http;
 namespace APBD_Cw3.Controllers {
 
     //https://localhost:44362/api/students
-    //http://localhost:51042/api/enrollment
+    //http://localhost:51042/api/enrollments
 
+        //ZAD 2:
+        /*
+        [Route("api/enrollments/promotions")];
+        [ApiController];
+    public class EnrollmentsController : ControllerBase
+    {
+        [Microsoft.AspNetCore.Mvc.HttpPost]
+        public IActionResult PromotionStudents(PromoteStudents request)
+        {
+
+
+
+            return Ok();
+        }
+
+    }
+    */
+
+
+        //ZAD 1:
+       //   /*
     [Microsoft.AspNetCore.Mvc.Route("api/enrollments")]
     [ApiController]
     public class EnrollmentsController : ControllerBase
@@ -25,24 +47,34 @@ namespace APBD_Cw3.Controllers {
         public IActionResult EnrollStudent(EnrollStudentRequest request) //EnrollStudentRequest request
         {
             var st = new Student();
+            st.LastName = request.LastName;
             st.FirstName = request.FirstName;
+            st.BirthDate = request.BirthDate;
+            st.Studies = request.Studies;
+            st.Semester = 1;
 
-            var response = new EnrollStudentResponse();
-            response.LastName = st.LastName;
+           //var response = new EnrollStudentResponse();
+           //response.LastName = st.LastName;
+           //response.Semester = 1;
+           //response.Index = request.IndexNumber;
+
+            var enrollment = new Enrollment();
+            enrollment.Semester = 1;
 
             using (var con = new SqlConnection("Data Source=db-mssql;Initial Catalog=s17470;Integrated Security=True"))
-                
             using (var com = new SqlCommand())
             {
               
                 com.Connection = con;
                 con.Open(); //otiweramy polaczenie
                 var tran = con.BeginTransaction(); //otwieramy nowa transakcje
+
                 try
                 {
                     //1. Spr czy istnieja studia
                     com.CommandText = "SELECT IdStudy FROM Studies WHERE name=@name"; //SQL command
                     com.Parameters.AddWithValue("name", request.Studies);  //set value to @name parameter
+                    //response.StudiesName = request.Studies;
                     com.Transaction = tran; //musi byc przed ExecuteReader
                     var dr = com.ExecuteReader(); //odczytujemy efekt zapytania
                     if (!dr.Read()) //jesli zapytanie NIC nie zwrocilo..
@@ -52,6 +84,8 @@ namespace APBD_Cw3.Controllers {
                         return BadRequest("Studia nie istnieja.");  //musimy zwrocic blad
                     }
                     int idStudies = (int)dr["IdStudy"]; //bierzemy number id studiow, przyda sie pozniej...
+                    //response.IdStudies = idStudies;
+                    enrollment.IdStudies = idStudies;
                     dr.Close();
 
                     //2. Spr czy nr indexu studenta jest unikalny
@@ -98,7 +132,8 @@ namespace APBD_Cw3.Controllers {
                     };
 
 
-
+                    //response.IdEnrollment = IdEnrollment;
+                    enrollment.IdEnrollment = IdEnrollment;
                     
                     com.CommandText = "INSERT INTO Student(IndexNumber, FirstName,LastName,BirthDate,IdEnrollment) VALUES (@index2,@firstName,@lastName,@birthDate,@idEnrollment)"; //nowe zapytanie, a raczej wypchniecie danych do tabeli
                     com.Parameters.AddWithValue("index2", request.IndexNumber); //przypisanie wartosci do powyzszych paramterow
@@ -116,7 +151,8 @@ namespace APBD_Cw3.Controllers {
                     string message = "";
                     while (dr.Read())
                     {
-                        message = string.Concat(message, '\n', "Enrollment ID:" , dr["IdEnrollment"].ToString(), ", Semester: ", dr["Semester"].ToString());
+                        //message = string.Concat(message, '\n', "Enrollment ID:" , dr["IdEnrollment"].ToString(), ", Semester: ", dr["Semester"].ToString());
+                        message = string.Concat(message, '\n', "Enrollment ID:", enrollment.IdEnrollment.ToString(), ", Semester: ", enrollment.Semester.ToString(), ", ID Studies: :", enrollment.IdStudies.ToString());
                     }
 
 
@@ -137,6 +173,7 @@ namespace APBD_Cw3.Controllers {
             }
 
         }
+        //*/
     }
 
 

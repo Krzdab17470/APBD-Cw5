@@ -25,7 +25,7 @@ namespace APBD_Cw3.Controllers
     {
 
 
-        //ZAD 4.5
+        //ZAD 1 
         string message = "";
         [HttpGet("{id}")]
         //https://localhost:44362/api/students/1059
