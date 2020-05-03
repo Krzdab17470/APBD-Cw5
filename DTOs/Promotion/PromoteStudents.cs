@@ -13,6 +13,6 @@ namespace APBD_Cw3.DTOs.Promotion
 		public string Studies { get; set; }
 
 		[Required]
-		public string Semester { get; set; }
+		public int Semester { get; set; }
 	}
 }

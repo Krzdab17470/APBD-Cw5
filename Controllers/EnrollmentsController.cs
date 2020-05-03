@@ -11,34 +11,78 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using System.Net;
 using System.Web.Http;
+using System.Data;
 
-
-namespace APBD_Cw3.Controllers {
+namespace APBD_Cw3.Controllers
+{
 
     //https://localhost:44362/api/students
     //http://localhost:51042/api/enrollments
+    //http://localhost:51042/api/enrollments/promotions
 
         //ZAD 2:
-        /*
-        [Route("api/enrollments/promotions")];
-        [ApiController];
+        
+        [Microsoft.AspNetCore.Mvc.Route("api/enrollments/promotions")]
+        [ApiController]
     public class EnrollmentsController : ControllerBase
     {
         [Microsoft.AspNetCore.Mvc.HttpPost]
         public IActionResult PromotionStudents(PromoteStudents request)
         {
 
+            using (var con = new SqlConnection("Data Source=db-mssql;Initial Catalog=s17470;Integrated Security=True"))
+            using (var com = new SqlCommand())
+            {
+
+                com.Connection = con;
+                con.Open(); //otiweramy polaczenie
+                var tran = con.BeginTransaction(); //otwieramy nowa transakcje
+                int temp = 0;
+
+                com.CommandText = "EXEC PROMOTESTUDENTS @STUDIES = @studies, @SEMESTER = @semester;"; //SQL command
+                
+                com.Parameters.AddWithValue("studies", request.Studies);  //set value to @name parameter
+                com.Parameters.AddWithValue("semester", request.Semester);  //set value to @name parameter
+                
+
+                com.Transaction = tran; //musi byc przed ExecuteReader
+                var dr = com.ExecuteReader(); //odczytujemy efekt zapytania
+                int idEnrollment;
 
 
-            return Ok();
+                Enrollment enrollment = new Enrollment();
+
+                if (!dr.Read()) //jesli zapytanie NIC nie zwrocilo..
+            {
+                return BadRequest("Wrong request.");
+            }
+            else
+            {
+                    
+                    enrollment.IdEnrollment =(int) dr["IdEnrollment"];
+                    enrollment.IdStudies = (int)dr["IdStudy"];
+                    enrollment.Semester = (int)dr["Semester"];
+                    //enrollment.StartDate = (string) dr["StartDate"];
+                    
+                idEnrollment = (int)dr[0];
+
+            }
+            dr.Close();
+            
+                tran.Commit();
+
+                
+
+                return Ok(enrollment);
+            }
         }
 
     }
-    */
-
+    
+    
 
         //ZAD 1:
-       //   /*
+         /*
     [Microsoft.AspNetCore.Mvc.Route("api/enrollments")]
     [ApiController]
     public class EnrollmentsController : ControllerBase
@@ -156,7 +200,8 @@ namespace APBD_Cw3.Controllers {
                     }
 
 
-                    return Ok(message);
+                    //return Ok(message);
+                    return Ok(enrollment);
 
                 }
                 catch (SqlException exc) //wylapujemy ewentualny blad...
@@ -173,7 +218,7 @@ namespace APBD_Cw3.Controllers {
             }
 
         }
-        //*/
+        */
     }
 
 
