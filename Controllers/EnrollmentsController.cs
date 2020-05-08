@@ -22,7 +22,7 @@ namespace APBD_Cw3.Controllers
     //http://localhost:51042/api/enrollments/promotions
 
     //ZAD 3
-    [Microsoft.AspNetCore.Mvc.Route("api/enrollments/promotions")]
+    [Microsoft.AspNetCore.Mvc.Route("api/enrollments")]
     [ApiController]
     public class EnrollmentsController : ControllerBase
     {
@@ -33,11 +33,12 @@ namespace APBD_Cw3.Controllers
             _service = service;
         }
         [Microsoft.AspNetCore.Mvc.HttpPost]
-        public IActionResult PromotionStudents(PromoteStudents request)
+        public IActionResult EnrollStudent(EnrollStudentRequest request)
         {
-            return Ok(_service.PromoteStudents(request.Semester, request.Studies));
+            return Ok(_service.EnrollStudent(request));
         }
 
+        //Ponizej robocze komentarze. Nie kasowalem z sentymentu.
             //ZAD 2:
             /*
             [Microsoft.AspNetCore.Mvc.Route("api/enrollments/promotions")]
